@@ -1,58 +1,50 @@
-# SmartCart Customer Segmentation
+# 🛒 SmartCart AI — Customer Segmentation Dashboard
 
-My second end-to-end ML project — an unsupervised clustering system that segments e-commerce customers into behavioral groups from raw, messy transactional data, replacing SmartCart's generic one-size-fits-all marketing.
-
-Built the full pipeline from scratch and then debugged it independently: fixing a target-leakage bug, replacing deprecated pandas patterns, and validating cluster count choice with two separate metrics before committing to a final model.
+A Streamlit dashboard that turns the SmartCart customer-segmentation notebook (`Smart_card.ipynb`) into an interactive analytics app.
 
 ## Problem Statement
-SmartCart, a multi-country e-commerce platform, used identical marketing and engagement strategies for all customers — with no understanding of distinct behavior patterns. This led to inefficient marketing, missed high-value customer retention, and delayed churn detection. Goal: group customers into meaningful segments using unsupervised ML, based on purchasing behavior, engagement, and loyalty indicators.
+E-commerce companies often treat all customers the same. This project groups customers by purchasing behavior, spending and engagement so that **targeted marketing strategies** can be designed for each segment.
 
-## Dataset
-- 2240 customers, 22 raw features (demographics, spend by category, purchase channel, engagement, feedback)
-- Missing values in Income (handled via median imputation)
-- No labels — fully unsupervised problem
+## Features
+- Upload a CSV, or use the built-in demo dataset automatically
+- Dataset summary and visual processing pipeline
+- Interactive charts (segment sizes, income vs spending, spending and recency distributions)
+- K-Means and Agglomerative clustering with adjustable k (2–10)
+- Silhouette and Davies-Bouldin evaluation with automatic model recommendation
+- 3D PCA cluster visualization
+- Data-driven segment names and marketing recommendations
+- Customer Explorer (assigns a new customer to a segment using the trained pipeline)
+- CSV export of clustered customers, segment profiles and recommendations
 
-## Approach
-- **EDA** — pairplots on Income, Recency, Response, Age, Total Spending, Total Children to spot outliers and relationships; correlation heatmap across engineered features
-- **Preprocessing** — median imputation on Income; outlier removal (Age < 90, Income < 600k)
-- **Feature engineering** — Age (from Year_Birth), Customer Tenure Days (from Dt_Customer), Total Spending (sum of 6 category spends), Total Children (Kidhome + Teenhome), simplified Education tiers (Undergraduate/Graduate/Postgraduate), simplified Marital status (Partner/Alone)
-- **Encoding** — One-Hot Encoding on Education and Living_With
-- **Scaling** — StandardScaler on all features
-- **Dimensionality reduction** — PCA to 3 components for clustering and 3D visualization
-- **Cluster count selection** — Elbow Method (KneeLocator) cross-checked against Silhouette Score across k=2–10, rather than picking k on a single metric
-- **Modeling** — trained and compared K-Means and Agglomerative Clustering (Ward linkage), k=4
-- **Cluster profiling** — mean feature summary per cluster, visualized via count plot and Income-vs-Spending scatter by cluster
+## ML Pipeline
+Raw data → median imputation → outlier removal → feature engineering (Age, Customer_Tenure, Total_Spending, Total_Children, Education_Level, Living_With_Partner) → scaling (StandardScaler) → PCA (3 components) → K-Means / Agglomerative (ward) → evaluation → profiling.
 
-## Key Fixes & Learnings
-This project went through a real debugging pass, not just a first-draft run:
-- **Target leakage fixed** — `Response` (a campaign-outcome column) was initially flowing into the scaled/PCA'd feature matrix used for clustering. Removed before PCA/scaling since it's an outcome label, not a segmentation feature.
-- **Deprecated pandas patterns removed** — `.replace()` for category remapping (Education, Marital_Status) replaced with `.map()`.
-- **Misleading metric print fixed** — silhouette score loop was printing the *last* k's score instead of the best one; now reports the actual best k and its score.
-- **Two-metric validation** — cluster count chosen using Elbow + Silhouette together, not a single heuristic.
-- **Model comparison** — K-Means and Agglomerative both run and visually compared in 3D PCA space before selecting cluster assignments for profiling.
+**Leakage fix:** `Response` and `AcceptedCmp1–5` are dropped before scaling, PCA and clustering.
 
 ## Tech Stack
-Python, pandas, scikit-learn, seaborn, matplotlib, kneed
+Python, Streamlit, pandas, NumPy, scikit-learn, Plotly
 
 ## Project Structure
 ```
-Smart_card.ipynb              # full pipeline: EDA → preprocessing → feature engineering → encoding → scaling → PCA → clustering → profiling
-smartcart_customers.csv       # dataset (gitignored)
-README.md
+smartcart-customer-segmentation/
+├── app.py
+├── requirements.txt
+├── README.md
+├── Smart_card.ipynb        (original notebook, untouched)
+└── .streamlit/config.toml
 ```
 
-## How to Run
-```
-git clone https://github.com/Devanshyelne/smartcart-customer-segmentation.git
-cd smartcart-customer-segmentation
-pip install pandas scikit-learn seaborn matplotlib kneed
-jupyter notebook Smart_card.ipynb
+## Run Locally
+```bash
+pip install -r requirements.txt
+streamlit run app.py
 ```
 
-## Future Work
-- Streamlit dashboard for interactive cluster exploration
-- Quantitative comparison (silhouette/Davies-Bouldin) between K-Means and Agglomerative instead of visual-only comparison
-- Cluster-based marketing recommendations per segment
-- Automated cluster naming/labeling based on dominant traits
+## Deploy to Streamlit Community Cloud
+Push to GitHub → share.streamlit.io → New app → select repo, branch `main`, main file `app.py` → Deploy.
 
-Built by Devansh Yelne — 2nd year AI & ML student, learning ML by building and breaking things properly.
+## Expected CSV Columns
+Required: `Income, Year_Birth, Recency, NumWebPurchases, NumStorePurchases` and at least one `Mnt*` column. Optional: `Dt_Customer, Kidhome, Teenhome, Education, Marital_Status, NumWebVisitsMonth`.
+
+## Future Improvements
+Automatic k selection (elbow/silhouette sweep), DBSCAN/GMM comparison, RFM scoring, campaign-uplift analysis.
