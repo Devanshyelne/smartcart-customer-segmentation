@@ -1,5 +1,7 @@
 """SmartCart AI - Customer Segmentation & Marketing Intelligence."""
 
+import os
+
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -20,203 +22,6 @@ st.set_page_config(
     page_icon="🛒",
     layout="wide",
     initial_sidebar_state="expanded",
-)
-
-
-# ============================================================
-# DARK THEME / CUSTOM CSS
-# ============================================================
-
-st.markdown(
-    """
-    <style>
-
-    /* Main background */
-    .stApp {
-        background-color: #0B1220;
-    }
-
-    .main .block-container {
-        padding-top: 1.5rem;
-        padding-bottom: 2rem;
-        max-width: 1350px;
-    }
-
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background-color: #080F1C;
-        border-right: 1px solid #1E293B;
-    }
-
-    section[data-testid="stSidebar"] h1,
-    section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] h3,
-    section[data-testid="stSidebar"] label,
-    section[data-testid="stSidebar"] p {
-        color: #E2E8F0 !important;
-    }
-
-    /* Hero */
-    .hero-box {
-        background: linear-gradient(
-            135deg,
-            #020617 0%,
-            #0F2445 55%,
-            #123563 100%
-        );
-        padding: 30px 34px;
-        border-radius: 18px;
-        margin-bottom: 22px;
-        border: 1px solid #1E3A5F;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.30);
-    }
-
-    .hero-title {
-        color: #FFFFFF;
-        font-size: 2.5rem;
-        font-weight: 800;
-        margin-bottom: 6px;
-    }
-
-    .hero-subtitle {
-        color: #93B4E8;
-        font-size: 1.35rem;
-        font-weight: 600;
-        margin-bottom: 10px;
-    }
-
-    .hero-description {
-        color: #CBD5E1;
-        font-size: 1rem;
-        line-height: 1.6;
-    }
-
-    /* KPI boxes */
-    .metric-box {
-        background: linear-gradient(
-            145deg,
-            #111827,
-            #0F172A
-        );
-        border: 1px solid #1E293B;
-        border-left: 5px solid #3B82F6;
-        border-radius: 14px;
-        padding: 18px 20px;
-        min-height: 100px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
-    }
-
-    .metric-value {
-        color: #F8FAFC;
-        font-size: 2rem;
-        font-weight: 800;
-        line-height: 1.1;
-    }
-
-    .metric-label {
-        color: #94A3B8;
-        font-size: 0.76rem;
-        font-weight: 600;
-        margin-top: 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    /* Section cards */
-    .segment-card {
-        background: linear-gradient(
-            145deg,
-            #111827,
-            #0F172A
-        );
-        border: 1px solid #1E293B;
-        border-top: 4px solid #3B82F6;
-        border-radius: 14px;
-        padding: 20px;
-        margin-bottom: 16px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
-    }
-
-    .segment-title {
-        color: #F8FAFC;
-        font-size: 1.1rem;
-        font-weight: 700;
-        margin-bottom: 10px;
-    }
-
-    .segment-description {
-        color: #CBD5E1;
-        line-height: 1.5;
-        margin-bottom: 10px;
-    }
-
-    .segment-recommendation {
-        color: #E2E8F0;
-        line-height: 1.5;
-        margin-bottom: 10px;
-    }
-
-    .segment-meta {
-        color: #94A3B8;
-        font-size: 0.84rem;
-    }
-
-    /* Horizontal separator */
-    hr {
-        border-color: #1E293B !important;
-    }
-
-    /* Tables */
-    div[data-testid="stDataFrame"] {
-        border: 1px solid #1E293B;
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    /* Metrics */
-    div[data-testid="stMetric"] {
-        background-color: #111827;
-        border: 1px solid #1E293B;
-        border-radius: 12px;
-        padding: 12px;
-    }
-
-    div[data-testid="stMetricLabel"] {
-        color: #94A3B8 !important;
-    }
-
-    div[data-testid="stMetricValue"] {
-        color: #F8FAFC !important;
-    }
-
-    /* File uploader */
-    section[data-testid="stFileUploaderDropzone"] {
-        background-color: #111827;
-        border: 1px dashed #334155;
-        border-radius: 10px;
-    }
-
-    /* Tabs */
-    button[data-baseweb="tab"] {
-        color: #94A3B8 !important;
-        font-weight: 600;
-    }
-
-    button[data-baseweb="tab"][aria-selected="true"] {
-        color: #60A5FA !important;
-    }
-
-    /* Footer */
-    .footer {
-        text-align: center;
-        color: #64748B;
-        font-size: 0.85rem;
-        padding: 30px 0 10px 0;
-    }
-
-    </style>
-    """,
-    unsafe_allow_html=True,
 )
 
 
@@ -297,44 +102,60 @@ PALETTE = [
     "#A855F7",
 ]
 
-BAD_DATA = (
-    "Your dataset does not contain enough compatible customer "
-    "features for segmentation."
-)
-
 SEGMENTS = {
-    "High-Value": (
-        "💎 High-Value Customers",
-        "Customers with strong purchasing power and high spending.",
-        "Offer loyalty rewards, premium products and exclusive early-access campaigns.",
-        "Offer premium loyalty benefits.",
-    ),
-    "Growth": (
-        "📈 Growth Customers",
-        "Customers with moderate spending and potential to spend more.",
-        "Use bundles, product recommendations and cross-selling.",
-        "Push bundles and cross-sell offers.",
-    ),
-    "At-Risk": (
-        "⚠️ At-Risk Customers",
-        "Customers who have not purchased recently.",
-        "Use personalized discounts, reminder campaigns and re-engagement offers.",
-        "Send a personalized win-back discount.",
-    ),
-    "Regular": (
-        "🛍️ Regular Customers",
-        "Customers with steady, lower-value shopping behavior.",
-        "Use seasonal promotions, loyalty points and low-cost upsell nudges.",
-        "Run seasonal promotions and points programs.",
-    ),
+    "High-Value": {
+        "name": "💎 High-Value Customers",
+        "description": (
+            "Customers with strong purchasing power and high spending."
+        ),
+        "strategy": (
+            "Offer loyalty rewards, premium products and exclusive "
+            "early-access campaigns."
+        ),
+        "action": "Offer premium loyalty benefits.",
+    },
+    "Growth": {
+        "name": "📈 Growth Customers",
+        "description": (
+            "Customers with moderate spending and strong potential "
+            "to increase their spending."
+        ),
+        "strategy": (
+            "Use bundles, product recommendations and cross-selling."
+        ),
+        "action": "Push bundles and cross-sell offers.",
+    },
+    "At-Risk": {
+        "name": "⚠️ At-Risk Customers",
+        "description": (
+            "Customers who have not purchased recently."
+        ),
+        "strategy": (
+            "Use personalized discounts, reminder campaigns and "
+            "re-engagement offers."
+        ),
+        "action": "Send a personalized win-back discount.",
+    },
+    "Regular": {
+        "name": "🛍️ Regular Customers",
+        "description": (
+            "Customers with steady, lower-value shopping behavior."
+        ),
+        "strategy": (
+            "Use seasonal promotions, loyalty points and low-cost "
+            "upsell nudges."
+        ),
+        "action": "Run seasonal promotions and points programs.",
+    },
 }
 
 
 # ============================================================
-# ERROR CLASS
+# ERROR TYPE
 # ============================================================
 
 class DataError(Exception):
+    """Application-specific data error."""
     pass
 
 
@@ -344,7 +165,7 @@ class DataError(Exception):
 
 @st.cache_data(show_spinner=False)
 def demo_data(n=1200, seed=42):
-    """Generate SmartCart-style demo customer data."""
+    """Generate SmartCart-style demonstration customer data."""
 
     rng = np.random.default_rng(seed)
 
@@ -358,7 +179,7 @@ def demo_data(n=1200, seed=42):
         [78000, 55000, 36000, 46000]
     )
 
-    spending_mean = np.array(
+    spend_mean = np.array(
         [1400, 650, 160, 320]
     )
 
@@ -378,20 +199,20 @@ def demo_data(n=1200, seed=42):
         [8, 6, 4, 3]
     )
 
-    visits_mean = np.array(
+    visit_mean = np.array(
         [4, 6, 7, 5]
     )
 
     spending = np.clip(
         rng.normal(
-            spending_mean[groups],
-            spending_mean[groups] * 0.25,
+            spend_mean[groups],
+            spend_mean[groups] * 0.25,
         ),
         10,
         None,
     )
 
-    mnt = (
+    category_spending = (
         spending[:, None]
         * rng.dirichlet(
             [6, 1, 4, 1.5, 1, 1.5],
@@ -489,11 +310,11 @@ def demo_data(n=1200, seed=42):
         }
     )
 
-    for name, values in zip(
+    for column_name, values in zip(
         MNT,
-        mnt.T,
+        category_spending.T,
     ):
-        df[name] = values
+        df[column_name] = values
 
     df["NumWebPurchases"] = np.clip(
         rng.poisson(
@@ -513,7 +334,7 @@ def demo_data(n=1200, seed=42):
 
     df["NumWebVisitsMonth"] = np.clip(
         rng.poisson(
-            visits_mean[groups]
+            visit_mean[groups]
         ),
         0,
         20,
@@ -531,7 +352,6 @@ def demo_data(n=1200, seed=42):
         n,
     )
 
-    # Add some missing Income values
     missing_indices = rng.choice(
         n,
         20,
@@ -551,16 +371,17 @@ def demo_data(n=1200, seed=42):
 # ============================================================
 
 def read_csv(file):
+    """Read CSV/TXT with automatic separator detection."""
+
     try:
         df = pd.read_csv(
             file,
             sep=None,
             engine="python",
         )
-    except Exception:
+    except Exception as exc:
         raise DataError(
-            "The file could not be read as a CSV. "
-            "Please upload a valid CSV file."
+            f"The uploaded file could not be read: {exc}"
         )
 
     if df.empty:
@@ -576,6 +397,7 @@ def read_csv(file):
 # ============================================================
 
 def preprocess(raw):
+    """Clean data and create ML-ready features."""
 
     df = raw.copy()
 
@@ -586,36 +408,37 @@ def preprocess(raw):
     )
 
     spending_columns = [
-        c
-        for c in MNT
-        if c in df.columns
+        column
+        for column in MNT
+        if column in df.columns
     ]
 
-    missing = [
-        c
-        for c in CORE
-        if c not in df.columns
+    missing_core = [
+        column
+        for column in CORE
+        if column not in df.columns
     ]
 
-    if missing or not spending_columns:
+    if missing_core or not spending_columns:
 
-        needed = missing.copy()
+        missing = list(missing_core)
 
         if not spending_columns:
-            needed.append(
+            missing.append(
                 "at least one Mnt* spending column"
             )
 
         raise DataError(
-            f"{BAD_DATA} Missing: "
-            f"{', '.join(needed)}."
+            "Your dataset does not contain enough compatible "
+            "customer features for segmentation. "
+            f"Missing: {', '.join(missing)}."
         )
 
-    # Remove leakage columns
+    # Remove target leakage
     leakage_columns = [
-        c
-        for c in LEAKAGE
-        if c in df.columns
+        column
+        for column in LEAKAGE
+        if column in df.columns
     ]
 
     df = df.drop(
@@ -624,8 +447,8 @@ def preprocess(raw):
     )
 
     numeric_columns = [
-        c
-        for c in (
+        column
+        for column in (
             CORE
             + spending_columns
             + [
@@ -634,10 +457,9 @@ def preprocess(raw):
                 "NumWebVisitsMonth",
             ]
         )
-        if c in df.columns
+        if column in df.columns
     ]
 
-    # Convert numeric values
     for column in numeric_columns:
         df[column] = pd.to_numeric(
             df[column],
@@ -653,7 +475,6 @@ def preprocess(raw):
 
     reference_year = pd.Timestamp.now().year
 
-    # Customer tenure
     if "Dt_Customer" in df.columns:
 
         dates = pd.to_datetime(
@@ -672,40 +493,43 @@ def preprocess(raw):
                 dates.max().year
             )
 
-            numeric_columns.append(
-                "Customer_Tenure"
-            )
+            if "Customer_Tenure" not in numeric_columns:
+                numeric_columns.append(
+                    "Customer_Tenure"
+                )
 
     # Median imputation
     for column in numeric_columns:
 
+        median_value = df[column].median()
+
+        if pd.isna(median_value):
+            median_value = 0
+
         df[column] = (
             df[column]
-            .fillna(
-                df[column].median()
-            )
+            .fillna(median_value)
             .fillna(0)
         )
 
-    # Age
+    # Feature engineering
+
     df["Age"] = (
         reference_year
         - df["Year_Birth"]
     )
 
-    # Total spending
     df["Total_Spending"] = df[
         spending_columns
     ].sum(axis=1)
 
-    # Total children
     child_columns = [
-        c
-        for c in [
+        column
+        for column in [
             "Kidhome",
             "Teenhome",
         ]
-        if c in df.columns
+        if column in df.columns
     ]
 
     if child_columns:
@@ -718,7 +542,6 @@ def preprocess(raw):
 
         df["Total_Children"] = 0
 
-    # Education encoding
     if "Education" in df.columns:
 
         df["Education_Level"] = (
@@ -727,7 +550,10 @@ def preprocess(raw):
             .fillna(1)
         )
 
-    # Partner encoding
+    else:
+
+        df["Education_Level"] = 1
+
     if "Marital_Status" in df.columns:
 
         df["Living_With_Partner"] = (
@@ -741,12 +567,18 @@ def preprocess(raw):
             .astype(int)
         )
 
-    # Remove outliers
-    before_cleaning = len(df)
+    else:
+
+        df["Living_With_Partner"] = 0
+
+    # Outlier filtering
+    rows_before = len(df)
 
     df = df[
         (df["Age"] <= 90)
+        & (df["Age"] >= 18)
         & (df["Income"] <= 600000)
+        & (df["Income"] >= 0)
     ].reset_index(drop=True)
 
     features = [
@@ -758,10 +590,7 @@ def preprocess(raw):
     info = {
         "rows_raw": len(raw),
         "rows_clean": len(df),
-        "outliers": (
-            before_cleaning
-            - len(df)
-        ),
+        "outliers": rows_before - len(df),
         "imputed": missing_count,
         "leak": leakage_columns,
         "features": features,
@@ -775,7 +604,7 @@ def preprocess(raw):
 
 
 # ============================================================
-# PCA + SCALING
+# SCALING + PCA
 # ============================================================
 
 @st.cache_data(show_spinner=False)
@@ -783,7 +612,7 @@ def build_space(X):
 
     scaler = StandardScaler()
 
-    scaled = scaler.fit_transform(X)
+    X_scaled = scaler.fit_transform(X)
 
     pca = PCA(
         n_components=3,
@@ -791,7 +620,7 @@ def build_space(X):
     )
 
     Z = pca.fit_transform(
-        scaled
+        X_scaled
     )
 
     return (
@@ -802,7 +631,7 @@ def build_space(X):
 
 
 # ============================================================
-# MODELS
+# CLUSTERING
 # ============================================================
 
 @st.cache_data(show_spinner=False)
@@ -816,47 +645,47 @@ def run_models(Z, k):
 
     kmeans.fit(Z)
 
-    kmeans_labels = (
-        kmeans.labels_
+    km_labels = kmeans.labels_
+
+    agglomerative = AgglomerativeClustering(
+        n_clusters=k,
+        linkage="ward",
     )
 
-    agglomerative = (
-        AgglomerativeClustering(
-            n_clusters=k,
-            linkage="ward",
-        )
+    ag_labels = (
+        agglomerative
         .fit_predict(Z)
     )
 
     return {
         "km": kmeans,
-        "km_labels": kmeans_labels,
-        "ag_labels": agglomerative,
+        "km_labels": km_labels,
+        "ag_labels": ag_labels,
 
         "km_sil": silhouette_score(
             Z,
-            kmeans_labels,
+            km_labels,
         ),
 
         "km_db": davies_bouldin_score(
             Z,
-            kmeans_labels,
+            km_labels,
         ),
 
         "ag_sil": silhouette_score(
             Z,
-            agglomerative,
+            ag_labels,
         ),
 
         "ag_db": davies_bouldin_score(
             Z,
-            agglomerative,
+            ag_labels,
         ),
     }
 
 
 # ============================================================
-# PROFILE
+# CLUSTER PROFILE
 # ============================================================
 
 def profile(
@@ -868,19 +697,19 @@ def profile(
 
     temp["Cluster"] = labels
 
-    columns = [
-        c
-        for c in PROFILE
-        if c in temp.columns
+    available_columns = [
+        column
+        for column in PROFILE
+        if column in temp.columns
     ]
 
-    profile_data = (
+    result = (
         temp
-        .groupby("Cluster")[columns]
+        .groupby("Cluster")[available_columns]
         .mean()
     )
 
-    profile_data.insert(
+    result.insert(
         0,
         "Customers",
         temp
@@ -888,11 +717,11 @@ def profile(
         .size(),
     )
 
-    return profile_data
+    return result
 
 
 # ============================================================
-# SEGMENT NAMING
+# AUTOMATIC SEGMENT NAMES
 # ============================================================
 
 def segment_labels(
@@ -901,35 +730,28 @@ def segment_labels(
 
     def z_score(series):
 
-        std = series.std(
+        standard_deviation = series.std(
             ddof=0
         )
 
-        if std == 0:
-            return (
-                series
-                - series.mean()
-            )
+        if standard_deviation == 0:
+            return series - series.mean()
 
         return (
-            series
-            - series.mean()
-        ) / std
+            series - series.mean()
+        ) / standard_deviation
 
     value_score = (
         z_score(
             profile_data["Income"]
         )
         + z_score(
-            profile_data[
-                "Total_Spending"
-            ]
+            profile_data["Total_Spending"]
         )
     )
 
     keys = {
-        value_score.idxmax():
-            "High-Value"
+        value_score.idxmax(): "High-Value"
     }
 
     remaining = [
@@ -965,74 +787,26 @@ def segment_labels(
             if cluster in keys:
                 continue
 
-            if (
+            cluster_spending = (
                 profile_data
                 .loc[
                     cluster,
                     "Total_Spending",
                 ]
-                >= median_spending
-            ):
+            )
 
-                keys[
-                    cluster
-                ] = "Growth"
-
+            if cluster_spending >= median_spending:
+                keys[cluster] = "Growth"
             else:
+                keys[cluster] = "Regular"
 
-                keys[
-                    cluster
-                ] = "Regular"
-
-    counts = (
-        pd.Series(keys)
-        .value_counts()
-    )
-
-    seen = {}
     names = {}
 
     for cluster in profile_data.index:
 
-        segment_type = keys[
-            cluster
-        ]
-
-        base_name = SEGMENTS[
-            segment_type
-        ][0]
-
-        if counts[
-            segment_type
-        ] > 1:
-
-            seen[
-                segment_type
-            ] = (
-                seen.get(
-                    segment_type,
-                    0,
-                )
-                + 1
-            )
-
-            names[
-                cluster
-            ] = (
-                f"{base_name} "
-                f"{chr(
-                    64
-                    + seen[
-                        segment_type
-                    ]
-                )}"
-            )
-
-        else:
-
-            names[
-                cluster
-            ] = base_name
+        names[cluster] = SEGMENTS[
+            keys[cluster]
+        ]["name"]
 
     return (
         keys,
@@ -1041,7 +815,7 @@ def segment_labels(
 
 
 # ============================================================
-# PLOTLY DARK THEME
+# PLOTLY DARK STYLING
 # ============================================================
 
 def style_plot(
@@ -1069,12 +843,12 @@ def style_plot(
         margin=dict(
             l=10,
             r=10,
-            t=55,
+            t=60,
             b=10,
         ),
     )
 
-    if height:
+    if height is not None:
         fig.update_layout(
             height=height
         )
@@ -1088,11 +862,11 @@ def style_plot(
 
 with st.sidebar:
 
-    st.markdown(
-        "## ⚙️ Dashboard Controls"
+    st.title(
+        "⚙️ Dashboard Controls"
     )
 
-    st.markdown("---")
+    st.divider()
 
     uploaded_file = st.file_uploader(
         "Upload customer CSV",
@@ -1102,16 +876,12 @@ with st.sidebar:
         ],
     )
 
-    st.markdown("")
-
     cluster_count = st.slider(
         "Number of clusters",
         min_value=2,
         max_value=10,
         value=4,
     )
-
-    st.markdown("")
 
     selected_model = st.radio(
         "Clustering model",
@@ -1121,8 +891,6 @@ with st.sidebar:
         ],
     )
 
-    st.markdown("")
-
     show_raw_data = st.checkbox(
         "Show raw data"
     )
@@ -1131,11 +899,11 @@ with st.sidebar:
         "Show preprocessing details"
     )
 
-    st.markdown("---")
+    st.divider()
 
     st.caption(
-        "No CSV uploaded → the built-in "
-        "demo dataset is used automatically."
+        "No CSV uploaded → the built-in demo "
+        "dataset is used automatically."
     )
 
 
@@ -1143,28 +911,21 @@ with st.sidebar:
 # HERO
 # ============================================================
 
-st.markdown(
-    """
-    <div class="hero-box">
-
-        <div class="hero-title">
-            🛒 SmartCart AI
-        </div>
-
-        <div class="hero-subtitle">
-            Customer Segmentation & Marketing Intelligence
-        </div>
-
-        <div class="hero-description">
-            Use machine learning to discover meaningful
-            customer groups from purchasing behavior,
-            spending patterns and engagement.
-        </div>
-
-    </div>
-    """,
-    unsafe_allow_html=True,
+st.title(
+    "🛒 SmartCart AI"
 )
+
+st.subheader(
+    "Customer Segmentation & Marketing Intelligence"
+)
+
+st.write(
+    "Use machine learning to discover meaningful customer "
+    "groups from purchasing behavior, spending patterns "
+    "and engagement."
+)
+
+st.divider()
 
 
 # ============================================================
@@ -1173,6 +934,7 @@ st.markdown(
 
 try:
 
+    # Uploaded file gets priority
     if uploaded_file is not None:
 
         raw_data = read_csv(
@@ -1184,6 +946,21 @@ try:
             f"{uploaded_file.name}"
         )
 
+    # Optional local CSV
+    elif os.path.exists(
+        "smartcart_customers.csv"
+    ):
+
+        raw_data = pd.read_csv(
+            "smartcart_customers.csv"
+        )
+
+        source = (
+            "Local dataset: "
+            "smartcart_customers.csv"
+        )
+
+    # Demo data
     else:
 
         raw_data = demo_data()
@@ -1198,16 +975,18 @@ try:
         )
     )
 
-    if len(clean_data) < max(
+    minimum_rows = max(
         30,
         5 * cluster_count,
-    ):
+    )
+
+    if len(clean_data) < minimum_rows:
 
         raise DataError(
-            f"Only {len(clean_data)} "
-            f"usable rows remain after "
-            f"cleaning. Reduce the number "
-            f"of clusters or upload more data."
+            f"Only {len(clean_data)} usable rows "
+            f"remain after cleaning. "
+            f"At least {minimum_rows} are recommended "
+            f"for {cluster_count} clusters."
         )
 
     X = clean_data[
@@ -1234,14 +1013,14 @@ except DataError as error:
 except Exception as error:
 
     st.error(
-        f"Unable to process the dataset: {error}"
+        f"Application error: {error}"
     )
 
     st.stop()
 
 
 # ============================================================
-# SELECT CLUSTER LABELS
+# CURRENT MODEL
 # ============================================================
 
 using_kmeans = (
@@ -1256,7 +1035,7 @@ labels = (
 
 
 # ============================================================
-# BUILD SEGMENT PROFILES
+# SEGMENTS
 # ============================================================
 
 profile_data = profile(
@@ -1286,100 +1065,50 @@ clean_data["Cluster"] = labels
 clean_data["Segment"] = (
     clean_data[
         "Cluster"
-    ].map(
-        segment_names
-    )
-)
-
-color_map = {
-    name: PALETTE[
-        i % len(PALETTE)
     ]
-    for i, name in enumerate(
-        sorted(
-            segment_names.values()
-        )
-    )
-}
+    .map(segment_names)
+)
 
 
 # ============================================================
 # KPI SECTION
 # ============================================================
 
-kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+best_silhouette = max(
+    results["km_sil"],
+    results["ag_sil"],
+)
+
+kpi1, kpi2, kpi3, kpi4 = (
+    st.columns(4)
+)
 
 with kpi1:
-
-    st.markdown(
-        f"""
-        <div class="metric-box">
-            <div class="metric-value">
-                {len(clean_data):,}
-            </div>
-            <div class="metric-label">
-                Total Customers
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    st.metric(
+        "Total Customers",
+        f"{len(clean_data):,}",
     )
 
 with kpi2:
-
-    st.markdown(
-        f"""
-        <div class="metric-box">
-            <div class="metric-value">
-                {len(features)}
-            </div>
-            <div class="metric-label">
-                Features Used
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    st.metric(
+        "Features Used",
+        len(features),
     )
 
 with kpi3:
-
-    st.markdown(
-        f"""
-        <div class="metric-box">
-            <div class="metric-value">
-                {cluster_count}
-            </div>
-            <div class="metric-label">
-                Number of Segments
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    st.metric(
+        "Number of Segments",
+        cluster_count,
     )
 
 with kpi4:
-
-    best_silhouette = max(
-        results["km_sil"],
-        results["ag_sil"],
-    )
-
-    st.markdown(
-        f"""
-        <div class="metric-box">
-            <div class="metric-value">
-                {best_silhouette:.3f}
-            </div>
-            <div class="metric-label">
-                Best Silhouette Score
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    st.metric(
+        "Best Silhouette Score",
+        f"{best_silhouette:.3f}",
     )
 
 
-st.markdown("")
+st.write("")
 
 
 # ============================================================
@@ -1404,7 +1133,7 @@ tabs = st.tabs(
 
 with tabs[0]:
 
-    st.subheader(
+    st.header(
         "📁 Dataset"
     )
 
@@ -1419,13 +1148,13 @@ with tabs[0]:
     with m1:
         st.metric(
             "Rows",
-            f"{len(raw_data):,}"
+            f"{len(raw_data):,}",
         )
 
     with m2:
         st.metric(
             "Columns",
-            raw_data.shape[1]
+            raw_data.shape[1],
         )
 
     with m3:
@@ -1435,7 +1164,7 @@ with tabs[0]:
                 raw_data.isna()
                 .sum()
                 .sum()
-            ):,}"
+            ):,}",
         )
 
     with m4:
@@ -1458,7 +1187,7 @@ with tabs[0]:
             ),
         )
 
-    st.markdown("")
+    st.write("")
 
     if show_raw_data:
 
@@ -1474,25 +1203,21 @@ with tabs[0]:
             use_container_width=True,
         )
 
-    st.markdown("")
+    st.write("")
 
     st.subheader(
         "Data Processing Pipeline"
     )
 
-    pipeline = [
-        "Raw Data",
-        "Missing Values",
-        "Outlier Removal",
-        "Feature Engineering",
-        "Encoding",
-        "Scaling",
-        "PCA",
-        "Clustering",
-    ]
-
     st.info(
-        " ➜ ".join(pipeline)
+        "Raw Data  ➜  "
+        "Missing Value Handling  ➜  "
+        "Outlier Removal  ➜  "
+        "Feature Engineering  ➜  "
+        "Encoding  ➜  "
+        "Scaling  ➜  "
+        "PCA  ➜  "
+        "Clustering"
     )
 
     if show_preprocessing:
@@ -1508,7 +1233,7 @@ with tabs[0]:
             )
 
             st.write(
-                f"**Clean rows:** "
+                f"**Rows after cleaning:** "
                 f"{info['rows_clean']:,}"
             )
 
@@ -1522,20 +1247,26 @@ with tabs[0]:
                 f"{info['imputed']:,}"
             )
 
-            leakage_text = (
-                ", ".join(info["leak"])
-                if info["leak"]
-                else "None"
-            )
+            if info["leak"]:
+
+                st.write(
+                    "**Leakage columns removed:** "
+                    + ", ".join(
+                        info["leak"]
+                    )
+                )
+
+            else:
+
+                st.write(
+                    "**Leakage columns removed:** None"
+                )
 
             st.write(
-                f"**Leakage columns removed:** "
-                f"{leakage_text}"
-            )
-
-            st.write(
-                f"**Features used:** "
-                f"{', '.join(features)}"
+                "**Features used:** "
+                + ", ".join(
+                    features
+                )
             )
 
             st.write(
@@ -1554,7 +1285,7 @@ with tabs[0]:
 
 with tabs[1]:
 
-    st.subheader(
+    st.header(
         "📊 Customer Overview"
     )
 
@@ -1574,7 +1305,7 @@ with tabs[1]:
         x="Segment",
         y="Customers",
         color="Segment",
-        color_discrete_map=color_map,
+        color_discrete_sequence=PALETTE,
         title="Customer Distribution by Segment",
     )
 
@@ -1602,7 +1333,7 @@ with tabs[1]:
         x="Income",
         y="Total_Spending",
         color="Segment",
-        color_discrete_map=color_map,
+        color_discrete_sequence=PALETTE,
         opacity=0.75,
         title="Income vs Total Spending",
         hover_data=[
@@ -1657,7 +1388,7 @@ with tabs[1]:
 
 with tabs[2]:
 
-    st.subheader(
+    st.header(
         "🤖 Model Evaluation"
     )
 
@@ -1684,14 +1415,12 @@ with tabs[2]:
     e1, e2 = st.columns(2)
 
     with e1:
-
         st.metric(
             f"Silhouette Score ({selected_model})",
             f"{silhouette:.3f}",
         )
 
     with e2:
-
         st.metric(
             f"Davies-Bouldin Score ({selected_model})",
             f"{davies_bouldin:.3f}",
@@ -1751,13 +1480,12 @@ with tabs[2]:
         )
 
     st.success(
-        f"🏆 Recommended Model: "
-        f"{best_model} "
-        f"(highest silhouette score "
-        f"for k = {cluster_count})"
+        f"🏆 Recommended Model: {best_model} "
+        f"(highest silhouette score for "
+        f"k = {cluster_count})"
     )
 
-    st.markdown("")
+    st.write("")
 
     st.subheader(
         "🌐 3D PCA Cluster Visualization"
@@ -1773,8 +1501,9 @@ with tabs[2]:
     )
 
     pca_data["Segment"] = (
-        clean_data["Segment"]
-        .values
+        clean_data[
+            "Segment"
+        ].values
     )
 
     pca_fig = px.scatter_3d(
@@ -1783,7 +1512,7 @@ with tabs[2]:
         y="PC2",
         z="PC3",
         color="Segment",
-        color_discrete_map=color_map,
+        color_discrete_sequence=PALETTE,
         opacity=0.82,
         title="3D PCA Customer Segmentation",
     )
@@ -1811,8 +1540,7 @@ with tabs[2]:
         f"PCA explained variance: "
         f"{explained_variance:.1f}% "
         f"(3 components) · "
-        f"Model shown: "
-        f"{selected_model}"
+        f"Model shown: {selected_model}"
     )
 
 
@@ -1822,8 +1550,8 @@ with tabs[2]:
 
 with tabs[3]:
 
-    st.subheader(
-        "👥 Segment Profiles"
+    st.header(
+        "👥 Customer Profiles"
     )
 
     displayed_profile = (
@@ -1842,9 +1570,9 @@ with tabs[3]:
         use_container_width=True,
     )
 
-    st.markdown("")
+    st.write("")
 
-    st.subheader(
+    st.header(
         "🎯 Marketing Recommendations"
     )
 
@@ -1858,18 +1586,11 @@ with tabs[3]:
         profile_data.index
     ):
 
-        segment_type = (
-            segment_keys[
-                cluster
-            ]
-        )
+        segment_type = segment_keys[
+            cluster
+        ]
 
-        (
-            display_name,
-            description,
-            strategy,
-            action,
-        ) = SEGMENTS[
+        segment_info = SEGMENTS[
             segment_type
         ]
 
@@ -1892,31 +1613,29 @@ with tabs[3]:
             )
 
         metadata = (
-            f"{int(row['Customers']):,} customers "
-            f"· avg income "
-            f"{row['Income']:,.0f} "
-            f"· avg spend "
-            f"{row['Total_Spending']:,.0f} "
-            f"· recency "
-            f"{row['Recency']:.0f} days "
-            f"· prefers "
-            f"{preferred_channel} purchases"
+            f"{int(row['Customers']):,} customers · "
+            f"Avg income ₹{row['Income']:,.0f} · "
+            f"Avg spend ₹{row['Total_Spending']:,.0f} · "
+            f"Recency {row['Recency']:.0f} days · "
+            f"Prefers {preferred_channel} purchases"
         )
 
         recommendations.append(
             {
-                "Segment": segment_names[
-                    cluster
+                "Segment": segment_info[
+                    "name"
                 ],
                 "Customers": int(
                     row["Customers"]
                 ),
-                "Description": description,
+                "Description": segment_info[
+                    "description"
+                ],
                 "Recommended Strategy": (
-                    f"{strategy} "
-                    f"Prioritise the "
-                    f"{preferred_channel} "
-                    f"channel."
+                    segment_info["strategy"]
+                    + " "
+                    + f"Prioritise the "
+                    f"{preferred_channel} channel."
                 ),
             }
         )
@@ -1925,34 +1644,35 @@ with tabs[3]:
             index % 2
         ]:
 
-            st.markdown(
-                f"""
-                <div class="segment-card">
+            with st.container(
+                border=True
+            ):
 
-                    <div class="segment-title">
-                        {display_name}
-                    </div>
+                st.subheader(
+                    segment_info["name"]
+                )
 
-                    <div class="segment-description">
-                        {description}
-                    </div>
+                st.write(
+                    segment_info[
+                        "description"
+                    ]
+                )
 
-                    <div class="segment-recommendation">
-                        <strong>Recommendation:</strong>
-                        {strategy}
-                        Prioritise the
-                        {preferred_channel}
-                        channel.
-                    </div>
+                st.markdown(
+                    "**Recommendation:** "
+                    + segment_info[
+                        "strategy"
+                    ]
+                )
 
-                    <div class="segment-meta">
-                        {metadata}
-                    </div>
+                st.caption(
+                    f"Prioritise the "
+                    f"**{preferred_channel}** channel."
+                )
 
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                st.caption(
+                    metadata
+                )
 
 
 # ============================================================
@@ -1961,13 +1681,14 @@ with tabs[3]:
 
 with tabs[4]:
 
-    st.subheader(
+    st.header(
         "🔎 Customer Explorer"
     )
 
-    st.caption(
-        "Enter customer characteristics to predict "
-        "their segment using the trained K-Means model."
+    st.write(
+        "Enter customer characteristics and predict "
+        "their likely segment using the trained "
+        "K-Means model."
     )
 
     left, right = st.columns(2)
@@ -1999,18 +1720,16 @@ with tabs[4]:
             ),
         )
 
-        spending_input = (
-            st.number_input(
-                "Total Spending",
-                min_value=0.0,
-                max_value=100000.0,
-                value=float(
-                    X[
-                        "Total_Spending"
-                    ].median()
-                ),
-                step=50.0,
-            )
+        spending_input = st.number_input(
+            "Total Spending",
+            min_value=0.0,
+            max_value=100000.0,
+            value=float(
+                X[
+                    "Total_Spending"
+                ].median()
+            ),
+            step=50.0,
         )
 
     with right:
@@ -2086,7 +1805,6 @@ with tabs[4]:
             ),
         )
 
-    # Start from median values
     customer_row = (
         X.median()
         .to_frame()
@@ -2163,38 +1881,37 @@ with tabs[4]:
         ]
     )
 
-    segment_details = SEGMENTS[
+    predicted_details = SEGMENTS[
         predicted_type
     ]
 
-    st.markdown("")
+    st.write("")
 
     st.success(
         f"Predicted Segment: "
         f"{predicted_segment}"
     )
 
-    st.markdown(
-        f"""
-        <div class="segment-card">
+    with st.container(
+        border=True
+    ):
 
-            <div class="segment-title">
-                {predicted_segment}
-            </div>
+        st.subheader(
+            predicted_details["name"]
+        )
 
-            <div class="segment-description">
-                {segment_details[1]}
-            </div>
+        st.write(
+            predicted_details[
+                "description"
+            ]
+        )
 
-            <div class="segment-recommendation">
-                <strong>Recommended Action:</strong>
-                {segment_details[3]}
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        st.markdown(
+            "**Recommended Action:** "
+            + predicted_details[
+                "action"
+            ]
+        )
 
 
 # ============================================================
@@ -2203,14 +1920,16 @@ with tabs[4]:
 
 with tabs[5]:
 
-    st.subheader(
-        "⬇️ Download Results"
+    st.header(
+        "⬇️ Export Results"
     )
 
-    output_columns = [
+    export_columns = [
         "Cluster",
         "Segment",
-    ] + [
+    ]
+
+    export_columns += [
         column
         for column in features
         if column in clean_data.columns
@@ -2222,7 +1941,7 @@ with tabs[5]:
             for column in ["ID"]
             if column in clean_data.columns
         ]
-        + output_columns
+        + export_columns
     ]
 
     d1, d2, d3 = st.columns(3)
@@ -2230,47 +1949,59 @@ with tabs[5]:
     with d1:
 
         st.download_button(
-            "⬇️ Clustered Customers CSV",
-            export_data
-            .to_csv(
-                index=False
-            )
-            .encode("utf-8"),
-            "clustered_customers.csv",
-            "text/csv",
+            label="⬇️ Clustered Customers CSV",
+            data=(
+                export_data
+                .to_csv(
+                    index=False
+                )
+                .encode("utf-8")
+            ),
+            file_name=(
+                "clustered_customers.csv"
+            ),
+            mime="text/csv",
             use_container_width=True,
         )
 
     with d2:
 
         st.download_button(
-            "⬇️ Segment Profiles CSV",
-            displayed_profile
-            .round(2)
-            .to_csv()
-            .encode("utf-8"),
-            "segment_profiles.csv",
-            "text/csv",
+            label="⬇️ Segment Profiles CSV",
+            data=(
+                displayed_profile
+                .round(2)
+                .to_csv()
+                .encode("utf-8")
+            ),
+            file_name=(
+                "segment_profiles.csv"
+            ),
+            mime="text/csv",
             use_container_width=True,
         )
 
     with d3:
 
         st.download_button(
-            "⬇️ Recommendations CSV",
-            pd.DataFrame(
-                recommendations
-            )
-            .to_csv(
-                index=False
-            )
-            .encode("utf-8"),
-            "recommendations.csv",
-            "text/csv",
+            label="⬇️ Recommendations CSV",
+            data=(
+                pd.DataFrame(
+                    recommendations
+                )
+                .to_csv(
+                    index=False
+                )
+                .encode("utf-8")
+            ),
+            file_name=(
+                "recommendations.csv"
+            ),
+            mime="text/csv",
             use_container_width=True,
         )
 
-    st.markdown("")
+    st.write("")
 
     st.subheader(
         "Preview"
@@ -2286,12 +2017,9 @@ with tabs[5]:
 # FOOTER
 # ============================================================
 
-st.markdown(
-    """
-    <div class="footer">
-        🛒 SmartCart AI · Customer Segmentation ·
-        K-Means + Agglomerative Clustering
-    </div>
-    """,
-    unsafe_allow_html=True,
+st.divider()
+
+st.caption(
+    "🛒 SmartCart AI · Customer Segmentation · "
+    "K-Means + Agglomerative Clustering"
 )
